@@ -152,68 +152,76 @@ def _():
               }
             `;
 
-            export default function render({ el, code, setCode }) {
-              const words = code ? code.trim().split(/\\s+/).filter(Boolean) : [];
+            class WordmathWidget extends HTMLElement {
+              connectedCallback() {
+                const shadow = this.attachShadow({ mode: "open" });
+                const words = this.code
+                  ? this.code.trim().split(/\\s+/).filter(Boolean)
+                  : [];
 
-              const style = document.createElement("style");
-              style.textContent = STYLE;
+                const style = document.createElement("style");
+                style.textContent = STYLE;
 
-              const container = document.createElement("div");
-              container.className = "wordmath-text-widget";
+                const container = document.createElement("div");
+                container.className = "wordmath-text-widget";
 
-              const list = document.createElement("div");
-              list.className = "wordmath-code";
+                const list = document.createElement("div");
+                list.className = "wordmath-code";
 
-              const updateList = () => {
-                const hasWords = words.length > 0;
-                list.textContent = hasWords ? words.join(" ") : "(empty)";
-                list.classList.toggle("is-empty", !hasWords);
-              };
-              updateList();
-
-              const row = document.createElement("div");
-              row.className = "wordmath-row";
-
-              const input = document.createElement("input");
-              input.type = "text";
-              input.placeholder = "type a number word, e.g. one";
-
-              const addWord = () => {
-                const value = input.value.trim();
-                if (!value) return;
-                words.push(value);
-                setCode(words.join(" "));
-                input.value = "";
+                const updateList = () => {
+                  const hasWords = words.length > 0;
+                  list.textContent = hasWords ? words.join(" ") : "(empty)";
+                  list.classList.toggle("is-empty", !hasWords);
+                };
                 updateList();
-              };
 
-              input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addWord();
-                }
-              });
+                const row = document.createElement("div");
+                row.className = "wordmath-row";
 
-              const addButton = document.createElement("button");
-              addButton.type = "button";
-              addButton.className = "wordmath-add";
-              addButton.textContent = "Add";
-              addButton.onclick = addWord;
+                const input = document.createElement("input");
+                input.type = "text";
+                input.placeholder = "type a number word, e.g. one";
 
-              const clearButton = document.createElement("button");
-              clearButton.type = "button";
-              clearButton.className = "wordmath-clear";
-              clearButton.textContent = "Clear";
-              clearButton.onclick = () => {
-                words.length = 0;
-                setCode("");
-                updateList();
-              };
+                const addWord = () => {
+                  const value = input.value.trim();
+                  if (!value) return;
+                  words.push(value);
+                  this.setCode(words.join(" "));
+                  input.value = "";
+                  updateList();
+                };
 
-              row.append(input, addButton, clearButton);
-              container.append(list, row);
-              el.replaceChildren(style, container);
+                input.addEventListener("keydown", (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addWord();
+                  }
+                });
+
+                const addButton = document.createElement("button");
+                addButton.type = "button";
+                addButton.className = "wordmath-add";
+                addButton.textContent = "Add";
+                addButton.onclick = addWord;
+
+                const clearButton = document.createElement("button");
+                clearButton.type = "button";
+                clearButton.className = "wordmath-clear";
+                clearButton.textContent = "Clear";
+                clearButton.onclick = () => {
+                  words.length = 0;
+                  this.setCode("");
+                  updateList();
+                };
+
+                row.append(input, addButton, clearButton);
+                container.append(list, row);
+                shadow.replaceChildren(style, container);
+              }
             }
+
+            export default WordmathWidget;
+            export const tagName = "wordmath-widget";
             """
 
     register_cell_dsl(WordMathDSL())

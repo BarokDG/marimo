@@ -14,10 +14,7 @@ import {
   GenericDSLParser,
 } from "@marimo-team/smart-cells";
 import type { LanguageAdapter } from "../types";
-import {
-  type DSLWidgetRenderOptions,
-  loadDslWidgetModule,
-} from "./dsl-widget-loader";
+import { type DSLWidgetElement, loadDslWidgetModule } from "./dsl-widget-loader";
 
 export type DSLLanguageAdapterMetadata = DSLMetadata;
 
@@ -43,17 +40,20 @@ class DSLWidgetType extends WidgetType {
   public override toDOM(view: EditorView): HTMLElement {
     const el = document.createElement("div");
     el.className = "mo-dsl-widget";
-    const opts: DSLWidgetRenderOptions = {
-      el,
-      code: this.doc,
-      setCode: (next) => {
-        view.dispatch({
-          changes: { from: 0, to: view.state.doc.length, insert: next },
-        });
-      },
-    };
     loadDslWidgetModule(this.spec)
-      .then((render) => render(opts))
+      .then((tagName) => {
+        // The tag is already `customElements.define`d by this point, so
+        // this comes back fully upgraded -- no "property set before
+        // upgrade" shadowing hazard from setting `.code`/`.setCode` below.
+        const widgetEl = document.createElement(tagName) as DSLWidgetElement;
+        widgetEl.code = this.doc;
+        widgetEl.setCode = (next) => {
+          view.dispatch({
+            changes: { from: 0, to: view.state.doc.length, insert: next },
+          });
+        };
+        el.replaceChildren(widgetEl);
+      })
       .catch((error: unknown) => {
         el.textContent = `Failed to load DSL widget: ${String(error)}`;
       });

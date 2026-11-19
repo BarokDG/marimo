@@ -69,9 +69,14 @@ class CellDSL(ABC):
         surface, replacing plain-text editing.
 
         Narrow contract, NOT anywidget's model/trait-sync protocol: the
-        module's default export is called once per cell instance with
-        `{el, code, setCode}` -- `code` is the cell's current unwrapped DSL
-        body; `setCode(next)` rewrites it. No comm, no continuous
+        module's default export is a class extending `HTMLElement` (a
+        Custom Element), and it must also have a named `tagName` export --
+        the hyphenated tag marimo registers it under (e.g. `"wordmath-
+        widget"`). marimo constructs one instance per cell, sets `.code`
+        (the cell's current unwrapped DSL body) and `.setCode` (a function
+        that rewrites it) on it, then mounts it -- rendering and lifecycle
+        (e.g. `connectedCallback`) are the class's own responsibility,
+        exactly like any custom element. No comm, no continuous
         bidirectional sync. Default: `None` (plain-text editing).
         """
         return None
