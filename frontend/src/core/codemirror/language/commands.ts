@@ -35,8 +35,8 @@ function canToggleToLanguage(
     return true;
   }
 
-  return LanguageAdapters[language].isSupported(
-    getEditorCodeAsPython(editorView),
+  return Boolean(
+    LanguageAdapters[language]?.isSupported(getEditorCodeAsPython(editorView)),
   );
 }
 

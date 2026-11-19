@@ -38,4 +38,23 @@ export interface LanguageAdapter<M = Record<string, any>> {
 export type LanguageMetadataOf<T extends LanguageAdapter> =
   T extends LanguageAdapter<infer M> ? M : never;
 
-export type LanguageAdapterType = "python" | "markdown" | "sql";
+// The `(string & {})` branch keeps autocomplete for the three builtins while
+// still allowing a dynamically-registered DSL name (see `register_cell_dsl`).
+export type LanguageAdapterType = "python" | "markdown" | "sql" | (string & {});
+
+/**
+ * Narrow an adapter type down to one the AI completion endpoints understand.
+ * Those endpoints don't know about dynamically-registered DSLs, but a DSL
+ * cell's code is still valid Python, so it maps to "python".
+ */
+export function toAiCompletionLanguage(
+  type: LanguageAdapterType,
+): "python" | "markdown" | "sql" {
+  if (type === "markdown") {
+    return "markdown";
+  }
+  if (type === "sql") {
+    return "sql";
+  }
+  return "python";
+}

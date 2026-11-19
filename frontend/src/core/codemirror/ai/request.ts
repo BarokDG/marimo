@@ -4,7 +4,10 @@ import { waitForConnectionOpen } from "@/core/network/connection";
 import type { AiCompletionRequest } from "@/core/network/types";
 import { streamCompletionText } from "@/core/ai/stream-completion-text";
 import { getRuntimeManager } from "@/core/runtime/config";
-import type { LanguageAdapterType } from "../language/types";
+import {
+  type LanguageAdapterType,
+  toAiCompletionLanguage,
+} from "../language/types";
 
 /**
  * Request to edit code with AI
@@ -41,7 +44,7 @@ ${opts.codeAfter}
         code: codeWithReplacement,
         selectedText: opts.selection,
         includeOtherCode: "",
-        language: opts.language,
+        language: toAiCompletionLanguage(opts.language),
       } satisfies AiCompletionRequest),
     },
   );

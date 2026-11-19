@@ -4,14 +4,17 @@ import { once } from "@/utils/once";
 import { MarkdownLanguageAdapter } from "./languages/markdown";
 import { PythonLanguageAdapter } from "./languages/python";
 import { SQLLanguageAdapter } from "./languages/sql/sql";
-import type { LanguageAdapter, LanguageAdapterType } from "./types";
+import type { LanguageAdapter } from "./types";
 
 // Create cached instances
 const createPythonAdapter = once(() => new PythonLanguageAdapter());
 const createMarkdownAdapter = once(() => new MarkdownLanguageAdapter());
 const createSqlAdapter = once(() => new SQLLanguageAdapter());
 
-export const LanguageAdapters: Record<LanguageAdapterType, LanguageAdapter> = {
+// Keyed by LanguageAdapterType, but declared as Record<string, _> since
+// dynamically-registered DSL adapters (see `registerCustomLanguageAdapter`)
+// aren't part of a closed literal union.
+export const LanguageAdapters: Record<string, LanguageAdapter> = {
   // Getters to prevent circular dependencies
   get python() {
     return createPythonAdapter();
@@ -23,6 +26,20 @@ export const LanguageAdapters: Record<LanguageAdapterType, LanguageAdapter> = {
     return createSqlAdapter();
   },
 };
+
+/**
+ * Register an adapter for a dynamically-registered DSL (see
+ * `register_cell_dsl`), making it available via `LanguageAdapters[type]`
+ * and `getLanguageAdapters()`.
+ */
+export function registerCustomLanguageAdapter(adapter: LanguageAdapter): void {
+  Object.defineProperty(LanguageAdapters, adapter.type, {
+    value: adapter,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  });
+}
 
 export function getLanguageAdapters(): LanguageAdapter[] {
   return Object.values(LanguageAdapters);

@@ -283,6 +283,7 @@ function handleNotification(
 
       case "consumer-capabilities":
       case "execution":
+      case "dsl-registered":
         return;
       default:
         logNever(msg);

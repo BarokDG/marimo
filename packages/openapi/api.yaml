@@ -1153,6 +1153,28 @@ components:
       - edges_with_vars
       title: CycleError
       type: object
+    DSLRegisteredNotification:
+      description: "A custom cell DSL was registered via `register_cell_dsl`.\n\n\
+        Attributes:\n    dsl_name: The DSL's short name (e.g. `wordmath`), used for\n\
+        \        `mo.<dsl_name>` and as the `CellImpl.language` tag.\n    call_names:\
+        \ Fully-qualified call names that mark a cell as this\n        DSL (e.g. `(\"\
+        mo.wordmath\",)`)."
+      properties:
+        call_names:
+          items:
+            type: string
+          type: array
+        dsl_name:
+          type: string
+        op:
+          enum:
+          - dsl-registered
+      required:
+      - op
+      - dsl_name
+      - call_names
+      title: DSLRegisteredNotification
+      type: object
     DataColumnPreviewNotification:
       description: "Data column preview with stats and visualization.\n\nInherits\
         \ all ColumnPreview attributes.\n\nAttributes:\n    table_name: Table containing\
@@ -4488,6 +4510,7 @@ components:
       - $ref: '#/components/schemas/ActiveLineNotification'
       - $ref: '#/components/schemas/NotebookDocumentTransactionNotification'
       - $ref: '#/components/schemas/ConsumerCapabilitiesNotification'
+      - $ref: '#/components/schemas/DSLRegisteredNotification'
       discriminator:
         mapping:
           active-line: '#/components/schemas/ActiveLineNotification'
@@ -4503,6 +4526,7 @@ components:
           data-source-connections: '#/components/schemas/DataSourceConnectionsNotification'
           data-source-discovery-result: '#/components/schemas/DataSourceDiscoveryResultNotification'
           datasets: '#/components/schemas/DatasetsNotification'
+          dsl-registered: '#/components/schemas/DSLRegisteredNotification'
           environment-operation: '#/components/schemas/EnvironmentOperationNotification'
           environment-state: '#/components/schemas/EnvironmentStateNotification'
           execution: '#/components/schemas/ExecutionNotification'

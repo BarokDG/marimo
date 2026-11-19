@@ -37,6 +37,9 @@ import {
 import { notebookCells } from "../cells/utils";
 import { capabilitiesAtom } from "../config/capabilities";
 import { connectionTransportTypeAtom } from "../config/config";
+import { registerCustomLanguageAdapter } from "../codemirror/language/LanguageAdapters";
+import { DSLLanguageAdapter } from "../codemirror/language/languages/dsl";
+import { addRegisteredDsl } from "../codemirror/language/registered-dsls";
 import { useDataSourceActions } from "../datasets/data-source-connections";
 import { invalidateDataSourceDiscovery } from "../datasets/data-source-discovery";
 import type { ConnectionName } from "../datasets/engines";
@@ -346,6 +349,18 @@ export function useNotebookSession(opts: {
             name: conn.name as ConnectionName,
           })),
         });
+        return;
+      case "dsl-registered":
+        addRegisteredDsl({
+          name: msg.data.dsl_name,
+          callNames: msg.data.call_names,
+        });
+        registerCustomLanguageAdapter(
+          new DSLLanguageAdapter({
+            name: msg.data.dsl_name,
+            callName: msg.data.call_names[0],
+          }),
+        );
         return;
       case "storage-namespaces":
         setStorageNamespaces(msg.data);

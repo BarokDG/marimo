@@ -4321,6 +4321,22 @@ export interface components {
       type: "cycle";
     };
     /**
+     * DSLRegisteredNotification
+     * @description A custom cell DSL was registered via `register_cell_dsl`.
+     *
+     *     Attributes:
+     *         dsl_name: The DSL's short name (e.g. `wordmath`), used for
+     *             `mo.<dsl_name>` and as the `CellImpl.language` tag.
+     *         call_names: Fully-qualified call names that mark a cell as this
+     *             DSL (e.g. `("mo.wordmath",)`).
+     */
+    DSLRegisteredNotification: {
+      call_names: string[];
+      dsl_name: string;
+      /** @enum {unknown} */
+      op: "dsl-registered";
+    };
+    /**
      * DataColumnPreviewNotification
      * @description Data column preview with stats and visualization.
      *
@@ -6324,7 +6340,8 @@ export interface components {
       | components["schemas"]["FocusCellNotification"]
       | components["schemas"]["ActiveLineNotification"]
       | components["schemas"]["NotebookDocumentTransactionNotification"]
-      | components["schemas"]["ConsumerCapabilitiesNotification"];
+      | components["schemas"]["ConsumerCapabilitiesNotification"]
+      | components["schemas"]["DSLRegisteredNotification"];
     /**
      * OpenAiConfig
      * @description Configuration options for OpenAI or OpenAI-compatible services.

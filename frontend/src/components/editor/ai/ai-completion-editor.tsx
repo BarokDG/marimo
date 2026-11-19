@@ -37,7 +37,10 @@ import { AI_SDK_UI_THROTTLE_MS } from "@/core/ai/constants";
 import { type AiCompletionCell, includeOtherCellsAtom } from "@/core/ai/state";
 import type { CellId } from "@/core/cells/ids";
 import { getCodes } from "@/core/codemirror/copilot/getCodes";
-import type { LanguageAdapterType } from "@/core/codemirror/language/types";
+import {
+  type LanguageAdapterType,
+  toAiCompletionLanguage,
+} from "@/core/codemirror/language/types";
 import { selectAllText } from "@/core/codemirror/utils";
 import { useRuntimeManager } from "@/core/runtime/config";
 import type { AiCompletionRequest } from "@/core/network/types";
@@ -173,7 +176,7 @@ export const AiCompletionEditor: React.FC<Props> = ({
         prompt,
         includeOtherCode: includeOtherCells ? getCodes(currentCode) : "",
         code: currentCode,
-        language: currentLanguageAdapter ?? "python",
+        language: toAiCompletionLanguage(currentLanguageAdapter ?? "python"),
       } satisfies AiCompletionRequest;
 
       await sendMessage({ text: prompt }, { body });

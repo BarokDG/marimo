@@ -1,5 +1,11 @@
 /* Copyright 2026 Marimo. All rights reserved. */
-import { DatabaseIcon, DiamondPlusIcon, PlusIcon } from "lucide-react";
+import {
+  Code2Icon,
+  DatabaseIcon,
+  DiamondPlusIcon,
+  PlusIcon,
+} from "lucide-react";
+import { useAtomValue } from "jotai";
 import { useRef, useState } from "react";
 import { Button } from "@/components/editor/inputs/Inputs";
 import { MinimalHotkeys } from "@/components/shortcuts/renderShortcut";
@@ -14,11 +20,16 @@ import { useCellActions } from "@/core/cells/actions";
 import { LanguageAdapters } from "@/core/codemirror/language/LanguageAdapters";
 import { MARKDOWN_INITIAL_HIDE_CODE } from "@/core/codemirror/language/languages/markdown";
 import {
+  type RegisteredDSL,
+  registeredDslListAtom,
+} from "@/core/codemirror/language/registered-dsls";
+import {
   getConnectionTooltip,
   isAppInteractionDisabled,
 } from "@/core/session/connection-utils";
 import type { ConnectionState } from "@/core/session/types";
 import { cn } from "@/utils/cn";
+import { capitalize } from "@/utils/strings";
 import { Tooltip } from "../../ui/tooltip";
 import { MarkdownIcon, PythonIcon } from "./code/icons";
 
@@ -34,6 +45,7 @@ export const CreateCellButton = ({
   oneClickShortcut: "shift" | "mod";
 }) => {
   const { createCell, addSetupCell } = useCellActions();
+  const registeredDsls = useAtomValue(registeredDslListAtom);
   const shortcut = `${oneClickShortcut}-Click`;
   const [open, setOpen] = useState(false);
   // Time the dropdown last opened, to ignore the click that opened it
@@ -72,6 +84,11 @@ export const CreateCellButton = ({
   const addSQLCell = () => {
     maybeAddMarimoImport({ autoInstantiate: true, createCell });
     onClick?.({ code: LanguageAdapters.sql.defaultCode });
+  };
+
+  const addDslCell = (dsl: RegisteredDSL) => {
+    maybeAddMarimoImport({ autoInstantiate: true, createCell });
+    onClick?.({ code: LanguageAdapters[dsl.name].defaultCode });
   };
 
   const renderIcon = (icon: React.ReactNode) => {
@@ -166,6 +183,12 @@ export const CreateCellButton = ({
           {renderIcon(<DatabaseIcon size={13} strokeWidth={1.5} />)}
           SQL cell
         </DropdownMenuItem>
+        {registeredDsls.map((dsl) => (
+          <DropdownMenuItem key={dsl.name} onClick={() => addDslCell(dsl)}>
+            {renderIcon(<Code2Icon size={13} strokeWidth={1.5} />)}
+            {capitalize(dsl.name)} cell
+          </DropdownMenuItem>
+        ))}
         <DropdownMenuItem onClick={() => addSetupCell()}>
           {renderIcon(<DiamondPlusIcon size={13} strokeWidth={1.5} />)}
           Setup cell

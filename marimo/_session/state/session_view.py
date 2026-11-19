@@ -16,6 +16,7 @@ from marimo._messaging.notification import (
     CellNotification,
     DatasetsNotification,
     DataSourceConnectionsNotification,
+    DSLRegisteredNotification,
     EnvironmentOperationNotification,
     EnvironmentState,
     EnvironmentStateNotification,
@@ -183,6 +184,8 @@ class SessionView:
         self.external_storage_namespaces = StorageNamespacesNotification(
             namespaces=[]
         )
+        # Registered custom cell DSLs, keyed by DSL name
+        self.registered_dsls: dict[str, DSLRegisteredNotification] = {}
         # The most recent Variables notification.
         self.variable_notifications: VariablesNotification = (
             VariablesNotification(variables=[])
@@ -419,6 +422,9 @@ class SessionView:
                 connections=list(connections.values())
             )
 
+        elif isinstance(notification, DSLRegisteredNotification):
+            self.registered_dsls[notification.dsl_name] = notification
+
         elif isinstance(notification, StorageNamespacesNotification):
             # Merge external storage namespaces, dedupe by name and keep the latest
             prev_namespaces = self.external_storage_namespaces.namespaces
@@ -639,6 +645,8 @@ class SessionView:
             all_notifications.append(self.data_connectors)
         if self.external_storage_namespaces.namespaces:
             all_notifications.append(self.external_storage_namespaces)
+        if self.registered_dsls:
+            all_notifications.extend(self.registered_dsls.values())
 
         # Model messages must come before cell notifications to ensure
         # the model exists before the view tries to use it.

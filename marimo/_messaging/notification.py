@@ -737,6 +737,21 @@ class VariableValuesNotification(Notification, tag="variable-values"):
     removed: list[VariableRemoval] = msgspec.field(default_factory=list)
 
 
+class DSLRegisteredNotification(Notification, tag="dsl-registered"):
+    """A custom cell DSL was registered via `register_cell_dsl`.
+
+    Attributes:
+        dsl_name: The DSL's short name (e.g. `wordmath`), used for
+            `mo.<dsl_name>` and as the `CellImpl.language` tag.
+        call_names: Fully-qualified call names that mark a cell as this
+            DSL (e.g. `("mo.wordmath",)`).
+    """
+
+    name: ClassVar[str] = "dsl-registered"
+    dsl_name: str
+    call_names: tuple[str, ...]
+
+
 class DatasetsNotification(Notification, tag="datasets"):
     """Available datasets for data explorer.
 
@@ -1160,4 +1175,6 @@ NotificationMessage = (
     | NotebookDocumentTransactionNotification
     # Consumer
     | ConsumerCapabilitiesNotification
+    # DSL
+    | DSLRegisteredNotification
 )
