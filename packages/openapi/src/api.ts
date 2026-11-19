@@ -4329,10 +4329,14 @@ export interface components {
      *             `mo.<dsl_name>` and as the `CellImpl.language` tag.
      *         call_names: Fully-qualified call names that mark a cell as this
      *             DSL (e.g. `("mo.wordmath",)`).
+     *         input_widget_esm_spec: Where to load this DSL's custom input-widget
+     *             ESM module from, if it supplies one.
      */
     DSLRegisteredNotification: {
       call_names: string[];
       dsl_name: string;
+      /** @default null */
+      input_widget_esm_spec?: components["schemas"]["EsmSpec"] | null;
       /** @enum {unknown} */
       op: "dsl-registered";
     };

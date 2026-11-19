@@ -359,6 +359,7 @@ export function useNotebookSession(opts: {
           new DSLLanguageAdapter({
             name: msg.data.dsl_name,
             callName: msg.data.call_names[0],
+            inputWidgetEsmSpec: msg.data.input_widget_esm_spec ?? undefined,
           }),
         );
         return;

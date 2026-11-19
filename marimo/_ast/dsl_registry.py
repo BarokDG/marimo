@@ -65,7 +65,10 @@ def register_cell_dsl(dsl: CellDSL) -> None:
     """
     import marimo
     from marimo._ast.dsl import CellDSL as _CellDSL
-    from marimo._messaging.notification import DSLRegisteredNotification
+    from marimo._messaging.notification import (
+        DSLRegisteredNotification,
+        EsmSpec,
+    )
     from marimo._messaging.notification_utils import broadcast_notification
 
     find_defs_and_refs = (
@@ -88,8 +91,11 @@ def register_cell_dsl(dsl: CellDSL) -> None:
     if dsl.name not in marimo.__all__:
         marimo.__all__.append(dsl.name)
 
+    esm = dsl.input_widget_esm()
     broadcast_notification(
         DSLRegisteredNotification(
-            dsl_name=dsl.name, call_names=dsl.call_names
+            dsl_name=dsl.name,
+            call_names=dsl.call_names,
+            input_widget_esm_spec=EsmSpec.from_esm(esm) if esm else None,
         )
     )

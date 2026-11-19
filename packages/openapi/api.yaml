@@ -1158,7 +1158,8 @@ components:
         Attributes:\n    dsl_name: The DSL's short name (e.g. `wordmath`), used for\n\
         \        `mo.<dsl_name>` and as the `CellImpl.language` tag.\n    call_names:\
         \ Fully-qualified call names that mark a cell as this\n        DSL (e.g. `(\"\
-        mo.wordmath\",)`)."
+        mo.wordmath\",)`).\n    input_widget_esm_spec: Where to load this DSL's custom\
+        \ input-widget\n        ESM module from, if it supplies one."
       properties:
         call_names:
           items:
@@ -1166,6 +1167,11 @@ components:
           type: array
         dsl_name:
           type: string
+        input_widget_esm_spec:
+          anyOf:
+          - $ref: '#/components/schemas/EsmSpec'
+          - type: 'null'
+          default: null
         op:
           enum:
           - dsl-registered

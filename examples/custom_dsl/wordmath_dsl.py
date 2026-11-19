@@ -70,6 +70,152 @@ def _():
             total = sum(_WORD_TO_NUM[token] for token in tokens)
             return _NUM_TO_WORD[total]
 
+        def input_widget_esm(self) -> str:
+            return """
+            const STYLE = `
+              .wordmath-text-widget {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                padding: 12px 14px;
+                border: 1px solid #0f0;
+                border-radius: 2px;
+                background: #000;
+                box-shadow: 0 0 10px rgba(0, 255, 65, 0.35), inset 0 0 20px rgba(0, 255, 65, 0.05);
+                font-family: "Courier New", Consolas, monospace;
+              }
+              .wordmath-text-widget .wordmath-code {
+                font-family: inherit;
+                font-size: 13px;
+                color: #00ff41;
+                text-shadow: 0 0 6px rgba(0, 255, 65, 0.8);
+                background: #000;
+                border: 1px dashed rgba(0, 255, 65, 0.4);
+                border-radius: 2px;
+                padding: 6px 10px;
+                min-height: 1.2em;
+              }
+              .wordmath-text-widget .wordmath-code::before {
+                content: "> ";
+                opacity: 0.7;
+              }
+              .wordmath-text-widget .wordmath-code.is-empty {
+                color: rgba(0, 255, 65, 0.4);
+                font-style: italic;
+                text-shadow: none;
+              }
+              .wordmath-text-widget .wordmath-row {
+                display: flex;
+                gap: 6px;
+              }
+              .wordmath-text-widget input {
+                flex: 1;
+                min-width: 0;
+                padding: 6px 10px;
+                font-size: 13px;
+                font-family: inherit;
+                color: #00ff41;
+                caret-color: #00ff41;
+                background: #000;
+                border: 1px solid #0f0;
+                border-radius: 2px;
+                outline: none;
+              }
+              .wordmath-text-widget input::placeholder {
+                color: rgba(0, 255, 65, 0.35);
+              }
+              .wordmath-text-widget input:focus {
+                box-shadow: 0 0 8px rgba(0, 255, 65, 0.9);
+              }
+              .wordmath-text-widget button {
+                padding: 6px 14px;
+                font-size: 13px;
+                font-weight: 700;
+                font-family: inherit;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                border-radius: 2px;
+                cursor: pointer;
+                border: 1px solid #0f0;
+                background: #000;
+                color: #00ff41;
+                transition: background 0.1s, color 0.1s;
+              }
+              .wordmath-text-widget button:hover {
+                background: #00ff41;
+                color: #000;
+                box-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+              }
+              .wordmath-text-widget button.wordmath-clear {
+                border-color: rgba(0, 255, 65, 0.4);
+                color: rgba(0, 255, 65, 0.6);
+              }
+            `;
+
+            export default function render({ el, code, setCode }) {
+              const words = code ? code.trim().split(/\\s+/).filter(Boolean) : [];
+
+              const style = document.createElement("style");
+              style.textContent = STYLE;
+
+              const container = document.createElement("div");
+              container.className = "wordmath-text-widget";
+
+              const list = document.createElement("div");
+              list.className = "wordmath-code";
+
+              const updateList = () => {
+                const hasWords = words.length > 0;
+                list.textContent = hasWords ? words.join(" ") : "(empty)";
+                list.classList.toggle("is-empty", !hasWords);
+              };
+              updateList();
+
+              const row = document.createElement("div");
+              row.className = "wordmath-row";
+
+              const input = document.createElement("input");
+              input.type = "text";
+              input.placeholder = "type a number word, e.g. one";
+
+              const addWord = () => {
+                const value = input.value.trim();
+                if (!value) return;
+                words.push(value);
+                setCode(words.join(" "));
+                input.value = "";
+                updateList();
+              };
+
+              input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addWord();
+                }
+              });
+
+              const addButton = document.createElement("button");
+              addButton.type = "button";
+              addButton.className = "wordmath-add";
+              addButton.textContent = "Add";
+              addButton.onclick = addWord;
+
+              const clearButton = document.createElement("button");
+              clearButton.type = "button";
+              clearButton.className = "wordmath-clear";
+              clearButton.textContent = "Clear";
+              clearButton.onclick = () => {
+                words.length = 0;
+                setCode("");
+                updateList();
+              };
+
+              row.append(input, addButton, clearButton);
+              container.append(list, row);
+              el.replaceChildren(style, container);
+            }
+            """
+
     register_cell_dsl(WordMathDSL())
 
 
@@ -83,13 +229,14 @@ def _(mo):
 
 
 @app.cell
-def _():
+def _(mo):
+    mo.wordmath(r"""
     two = 'three'
-    return (two,)
+    """)
 
 
 @app.cell
-def _(mo, two: str):
+def _(mo, two):
     mo.wordmath(f"one {two} four")
 
 

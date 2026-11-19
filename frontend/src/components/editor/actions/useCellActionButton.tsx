@@ -51,6 +51,7 @@ import {
 } from "@/core/codemirror/language/commands";
 import { switchLanguage } from "@/core/codemirror/language/extension";
 import { MARKDOWN_INITIAL_HIDE_CODE } from "@/core/codemirror/language/languages/markdown";
+import { registeredDslListAtom } from "@/core/codemirror/language/registered-dsls";
 import {
   aiFeaturesEnabledAtom,
   appWidthAtom,
@@ -62,6 +63,7 @@ import { canEditAtom } from "@/core/notebook";
 import { canLinkToCell, createCellLink } from "@/utils/cell-urls";
 import { copyToClipboard } from "@/utils/copy";
 import { downloadCellOutputAsImage } from "@/utils/download";
+import { capitalize } from "@/utils/strings";
 import { MarkdownIcon, PythonIcon } from "../cell/code/icons";
 import { useDeleteCellCallback } from "../cell/useDeleteCell";
 import { useStagedAICellActions } from "../cell/StagedAICell";
@@ -111,6 +113,7 @@ export function useCellActionButtons({ cell, closePopover }: Props) {
   const autoInstantiate = useAtomValue(autoInstantiateAtom);
   const canEdit = useAtomValue(canEditAtom);
   const appWidth = useAtomValue(appWidthAtom);
+  const registeredDsls = useAtomValue(registeredDslListAtom);
 
   if (!cell || !canEdit) {
     return [];
@@ -278,6 +281,33 @@ export function useCellActionButtons({ cell, closePopover }: Props) {
             },
             hidden: isSetupCell,
           },
+      ...registeredDsls.flatMap((dsl): ActionButton[] => {
+        const isActive =
+          getCurrentLanguageAdapter(getEditorView()) === dsl.name;
+        return [
+          {
+            icon: <Code2Icon size={13} strokeWidth={1.5} />,
+            label: isActive
+              ? "View as Python"
+              : `Convert to ${capitalize(dsl.name)}`,
+            handle: () => {
+              const editorView = getEditorView();
+              if (!editorView) {
+                return;
+              }
+              if (!isActive) {
+                maybeAddMarimoImport({ autoInstantiate, createCell });
+              }
+              switchLanguage(editorView, {
+                language: isActive ? "python" : dsl.name,
+                keepCodeAsIs: false,
+              });
+            },
+            hidden: isSetupCell,
+            additionalKeywords: ["convert", "dsl", dsl.name],
+          },
+        ];
+      }),
     ],
 
     // Movement

@@ -63,3 +63,15 @@ class CellDSL(ABC):
         `mo.<name>("...")`.
         """
         return None
+
+    def input_widget_esm(self) -> str | None:
+        """Optional ESM module (as a string) rendering this DSL's input
+        surface, replacing plain-text editing.
+
+        Narrow contract, NOT anywidget's model/trait-sync protocol: the
+        module's default export is called once per cell instance with
+        `{el, code, setCode}` -- `code` is the cell's current unwrapped DSL
+        body; `setCode(next)` rewrites it. No comm, no continuous
+        bidirectional sync. Default: `None` (plain-text editing).
+        """
+        return None
