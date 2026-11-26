@@ -2,71 +2,38 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
-
-if TYPE_CHECKING:
-    import ast
-
-    from marimo._ast.cell import CellImpl
-    from marimo._ast.visitor import ScopedVisitor
+from typing import Any
 
 
 class CellDSL(ABC):
-    """A pluggable custom-DSL cell type.
+    """Documented contract for a custom DSL, implemented as a plain Python
+    callable.
 
-    Subclass this and pass an instance to `register_cell_dsl` to let marimo
-    recognize `mo.<name>(...)` calls as a distinct cell language, with
-    optional cross-cell ref/def extraction and execution -- the same
-    mechanism SQL cells (`mo.sql(...)`) use internally, made available to
-    other DSLs.
+    This is *not* a registry or dispatch mechanism -- marimo never looks up
+    or calls through this interface. A cell recognizes a DSL purely by
+    calling an ordinary variable as a function (e.g. `wordmath("...")`),
+    which already gets full dependency-graph reactivity via marimo's
+    ordinary Python name-reference tracking, with or without this base
+    class. `CellDSL` exists only to give DSL authors (and
+    `register_dsl_widget`) a predictable, documented shape to implement.
     """
-
-    @property
-    @abstractmethod
-    def name(self) -> str:
-        """Short name, e.g. `"wordmath"`. Becomes `mo.<name>` and the
-        `CellImpl.language` tag used for matched cells."""
-
-    @property
-    def call_names(self) -> tuple[str, ...]:
-        """Fully-qualified call names that mark a cell as this DSL.
-
-        Matched the same way as SQL's call detection: `node.func` must be a
-        plain `ast.Attribute` on a bare `ast.Name`, with exactly one
-        positional string/f-string argument. Default: `("mo.<name>",)`.
-        """
-        return (f"mo.{self.name}",)
-
-    def find_defs_and_refs(
-        self, _visitor: ScopedVisitor, _node: ast.Call, _source: str
-    ) -> None:
-        """Register cross-cell defs/refs found in `source`.
-
-        Call `visitor._define(...)` / `visitor._add_ref(...)` as needed.
-        Default: no-op. Most DSLs -- like a pure string-to-value transform --
-        have no table/variable-like entities inside their source string, and
-        get ordinary Python reactivity for free via the cell's assignment
-        target(s).
-        """
-        return
 
     @abstractmethod
     def execute(self, source: str) -> Any:
-        """Run the DSL on `source`. Becomes the body of the generated
-        `mo.<name>(...)` callable."""
+        """Execute the DSL on `source`."""
 
-    def render(self, _cell: CellImpl) -> str | None:
-        """Optional codegen round-trip hook.
+    def __call__(self, source: str) -> Any:
+        """Makes instances directly callable, e.g. `wordmath("...")`.
 
-        Default: `None`, meaning "the cell's literal source is already
-        valid Python" -- true for any DSL whose surface syntax is
-        `mo.<name>("...")`.
+        Implement `execute`, not this -- `__call__` just forwards to it, so
+        marimo's cells can call a DSL as an ordinary function with no
+        dispatch mechanism involved.
         """
-        return None
+        return self.execute(source)
 
     def input_widget_esm(self) -> str | None:
         """Optional ESM module (as a string) rendering this DSL's input
-        surface, replacing plain-text editing.
+        surface, replacing plain-text editing. See `register_dsl_widget`.
 
         Narrow contract, NOT anywidget's model/trait-sync protocol: the
         module's default export is a class extending `HTMLElement` (a

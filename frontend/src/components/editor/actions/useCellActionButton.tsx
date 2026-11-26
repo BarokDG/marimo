@@ -295,9 +295,8 @@ export function useCellActionButtons({ cell, closePopover }: Props) {
               if (!editorView) {
                 return;
               }
-              if (!isActive) {
-                maybeAddMarimoImport({ autoInstantiate, createCell });
-              }
+              // A DSL cell is a bare Python name call, not a `mo.*` call --
+              // no marimo import needed, unlike SQL/Markdown above.
               switchLanguage(editorView, {
                 language: isActive ? "python" : dsl.name,
                 keepCodeAsIs: false,

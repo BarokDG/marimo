@@ -272,7 +272,7 @@ export function languageAdapterFromCode(doc: string): LanguageAdapter {
     return LanguageAdapters.sql;
   }
 
-  // Dynamically-registered DSL adapters (see `register_cell_dsl`), checked
+  // Dynamically-registered DSL adapters (see `register_dsl_widget`), checked
   // after the builtins so they never take priority over Markdown/SQL.
   for (const adapter of getLanguageAdapters()) {
     if (

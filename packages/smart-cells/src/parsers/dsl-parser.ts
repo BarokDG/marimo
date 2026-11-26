@@ -18,7 +18,8 @@ export interface DSLMetadata {
 export interface DSLParserOptions {
   /** DSL short name, e.g. "wordmath". Becomes the parser's `type`. */
   name: string;
-  /** Fully-qualified call name, e.g. "mo.wordmath". */
+  /** Bare call name, e.g. "wordmath" -- an ordinary Python name, not a
+   * module attribute. */
   callName: string;
 }
 
@@ -51,12 +52,13 @@ function buildRegexes(callName: string) {
 }
 
 /**
- * Generic parser for a custom cell DSL registered via `register_cell_dsl`.
+ * Generic parser for a custom cell DSL whose widget was announced via
+ * `register_dsl_widget`.
  *
- * Converts between Python code like `mo.wordmath(r"""one plus two""")` and
+ * Converts between Python code like `wordmath(r"""one plus two""")` and
  * the DSL's raw surface syntax, e.g. `one plus two`. This mirrors
- * `MarkdownParser`'s wrapping convention, since `CellDSL.call_names`
- * documents the same "single positional string/f-string argument" shape.
+ * `MarkdownParser`'s wrapping convention: a single positional
+ * string/f-string argument to a bare Python name call.
  */
 export class GenericDSLParser implements LanguageParser<DSLMetadata> {
   readonly type: string;
@@ -147,17 +149,16 @@ export class GenericDSLParser implements LanguageParser<DSLMetadata> {
     }
 
     // Parse the code using Lezer and check for the exact match of the
-    // <callName>(...) call signature
+    // <callName>(...) call signature. `callName` is a bare Python name
+    // (e.g. "wordmath"), so the callee is a plain VariableName -- not a
+    // MemberExpression like "mo.wordmath" would parse to.
     const tree = pythonLanguage.parser.parse(pythonCode);
 
     const enterOrder: Array<{ match: string | RegExp; stop?: boolean }> = [
       { match: "Script" },
       { match: "ExpressionStatement" },
       { match: "CallExpression" },
-      { match: "MemberExpression" },
       { match: "VariableName" },
-      { match: "." },
-      { match: "PropertyName" },
       { match: "ArgList" },
       { match: "(" },
       { match: /String|FormatString/, stop: true },

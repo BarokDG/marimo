@@ -29,7 +29,7 @@ export const LanguageAdapters: Record<string, LanguageAdapter> = {
 
 /**
  * Register an adapter for a dynamically-registered DSL (see
- * `register_cell_dsl`), making it available via `LanguageAdapters[type]`
+ * `register_dsl_widget`), making it available via `LanguageAdapters[type]`
  * and `getLanguageAdapters()`.
  */
 export function registerCustomLanguageAdapter(adapter: LanguageAdapter): void {

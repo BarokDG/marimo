@@ -1154,12 +1154,14 @@ components:
       title: CycleError
       type: object
     DSLRegisteredNotification:
-      description: "A custom cell DSL was registered via `register_cell_dsl`.\n\n\
-        Attributes:\n    dsl_name: The DSL's short name (e.g. `wordmath`), used for\n\
-        \        `mo.<dsl_name>` and as the `CellImpl.language` tag.\n    call_names:\
-        \ Fully-qualified call names that mark a cell as this\n        DSL (e.g. `(\"\
-        mo.wordmath\",)`).\n    input_widget_esm_spec: Where to load this DSL's custom\
-        \ input-widget\n        ESM module from, if it supplies one."
+      description: "A custom input widget was announced via `register_dsl_widget`.\n\
+        \nAttributes:\n    dsl_name: The DSL's short name (e.g. `wordmath`) -- the\
+        \ bare\n        Python name cells call as `wordmath(\"...\")`.\n    call_names:\
+        \ Bare call names that mark a cell as this DSL (e.g.\n        `(\"wordmath\"\
+        ,)`). Purely a CodeMirror editing affordance --\n        execution is ordinary\
+        \ Python, unrelated to this notification.\n    input_widget_esm_spec: Where\
+        \ to load this DSL's custom input-widget\n        ESM module from, if it supplies\
+        \ one."
       properties:
         call_names:
           items:

@@ -39,7 +39,7 @@ export type LanguageMetadataOf<T extends LanguageAdapter> =
   T extends LanguageAdapter<infer M> ? M : never;
 
 // The `(string & {})` branch keeps autocomplete for the three builtins while
-// still allowing a dynamically-registered DSL name (see `register_cell_dsl`).
+// still allowing a dynamically-registered DSL name (see `register_dsl_widget`).
 export type LanguageAdapterType = "python" | "markdown" | "sql" | (string & {});
 
 /**

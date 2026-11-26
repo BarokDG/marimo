@@ -87,7 +87,8 @@ export const CreateCellButton = ({
   };
 
   const addDslCell = (dsl: RegisteredDSL) => {
-    maybeAddMarimoImport({ autoInstantiate: true, createCell });
+    // Unlike markdown/SQL, a DSL cell is a bare Python name call (e.g.
+    // `wordmath(...)`), not a `mo.*` call -- no marimo import needed.
     onClick?.({ code: LanguageAdapters[dsl.name].defaultCode });
   };
 

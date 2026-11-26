@@ -23,30 +23,35 @@ def _(mo):
     mo.md("""
     # Custom DSL cells: a word-math example
 
-    This notebook demos an **in-progress, unshipped** mechanism for
-    registering custom non-SQL "DSL cells" -- generalizing the way
-    `mo.sql(...)` cells work today so other DSLs can plug in the same
-    way, without marimo core needing to special-case each one.
-
-    `CellDSL` and `register_cell_dsl` live in **private** modules
-    (`marimo._ast.dsl`, `marimo._ast.dsl_registry`) and are **not** a
-    public API yet -- this notebook is for trying the mechanism out,
-    not a feature to build on.
+    A "custom DSL" is nothing more than an ordinary Python callable bound
+    to an ordinary variable. There's no marimo-specific registration step
+    for *execution* -- `wordmath` is a `CellDSL` instance, called directly
+    like any other callable, and gets full reactivity for free: editing or
+    deleting the cell that creates it correctly breaks every cell that
+    calls it, live, with no special-casing anywhere in marimo. `CellDSL`
+    itself is just a documented contract for DSL authors to implement --
+    marimo never looks it up or dispatches through it.
 
     `WordMathDSL` itself lives in `wordmath_extension.py`, a plain sibling
     module imported below -- not defined inline -- to demonstrate that a
-    DSL extension can be authored and shipped like any other importable
-    Python package, with the notebook only importing it and calling
-    `register_cell_dsl(...)`.
+    DSL can be authored and shipped like any other importable Python
+    package.
+
+    The *only* optional, separate piece is a custom input widget
+    (replacing plain-text editing with the terminal-styled box below) --
+    purely a CodeMirror editing affordance, registered via
+    `register_dsl_widget`. It has no bearing on execution or reactivity,
+    which already work without it.
     """)
 
 
 @app.cell
 def _():
-    from marimo._ast.dsl_registry import register_cell_dsl
+    from marimo._ast.dsl_registry import register_dsl_widget
     from wordmath_extension import WordMathDSL
 
-    register_cell_dsl(WordMathDSL())
+    wordmath = register_dsl_widget("wordmath", WordMathDSL())
+    return (wordmath,)
 
 
 @app.cell(hide_code=True)
@@ -60,13 +65,13 @@ def _(mo):
 
 @app.cell
 def _():
-    two = 'two'
+    two = "two"
     return (two,)
 
 
 @app.cell
-def _(mo, two: str):
-    mo.wordmath(f"one {two} four")
+def _(two: str, wordmath):
+    wordmath(f"one {two} four")
 
 
 if __name__ == "__main__":

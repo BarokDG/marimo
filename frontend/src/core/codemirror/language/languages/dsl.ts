@@ -134,7 +134,8 @@ function buildInputWidgetExtension(spec: {
 }
 
 /**
- * Language adapter for a custom cell DSL registered via `register_cell_dsl`.
+ * Language adapter for a custom cell DSL whose widget was announced via
+ * `register_dsl_widget`.
  *
  * There's no known grammar for an arbitrary DSL, so by default this only
  * offers plain-text editing (no syntax highlighting or completions) -- the

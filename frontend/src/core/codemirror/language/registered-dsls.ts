@@ -11,8 +11,8 @@ export interface RegisteredDSL {
 const registeredDslsAtom = atom<ReadonlyMap<string, RegisteredDSL>>(new Map());
 
 /**
- * Record a DSL registered via `register_cell_dsl` (backend notification
- * `"dsl-registered"`). Dedupes by name, keeping the latest.
+ * Record a DSL widget announced via `register_dsl_widget` (backend
+ * notification `"dsl-registered"`). Dedupes by name, keeping the latest.
  */
 export function addRegisteredDsl(dsl: RegisteredDSL): void {
   const prev = store.get(registeredDslsAtom);

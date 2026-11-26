@@ -738,13 +738,14 @@ class VariableValuesNotification(Notification, tag="variable-values"):
 
 
 class DSLRegisteredNotification(Notification, tag="dsl-registered"):
-    """A custom cell DSL was registered via `register_cell_dsl`.
+    """A custom input widget was announced via `register_dsl_widget`.
 
     Attributes:
-        dsl_name: The DSL's short name (e.g. `wordmath`), used for
-            `mo.<dsl_name>` and as the `CellImpl.language` tag.
-        call_names: Fully-qualified call names that mark a cell as this
-            DSL (e.g. `("mo.wordmath",)`).
+        dsl_name: The DSL's short name (e.g. `wordmath`) -- the bare
+            Python name cells call as `wordmath("...")`.
+        call_names: Bare call names that mark a cell as this DSL (e.g.
+            `("wordmath",)`). Purely a CodeMirror editing affordance --
+            execution is ordinary Python, unrelated to this notification.
         input_widget_esm_spec: Where to load this DSL's custom input-widget
             ESM module from, if it supplies one.
     """

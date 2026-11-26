@@ -12,7 +12,6 @@ from typing import TYPE_CHECKING, Literal, Union
 from uuid import uuid4
 
 from marimo import _loggers
-from marimo._ast.dsl_registry import CELL_DSL_REGISTRY
 from marimo._ast.errors import ImportStarError, LazyImportError
 from marimo._ast.sql_visitor import (
     SQLDefs,
@@ -45,15 +44,6 @@ class LexicalScope(str, Enum):
     CLASS = "class"
     COMPREHENSION = "comprehension"
     ANNOTATION = "annotation"
-
-
-def _extract_literal_str_arg(node: ast.expr) -> str | None:
-    """Extract a literal string or f-string's text, if `node` is one."""
-    if isinstance(node, ast.Constant) and isinstance(node.value, str):
-        return node.value
-    elif isinstance(node, ast.JoinedStr):
-        return normalize_sql_f_string(node)
-    return None
 
 
 def is_lazy_import(node: ast.AST) -> bool:
@@ -886,20 +876,6 @@ class ScopedVisitor(ast.NodeVisitor):
                             self._add_ref(
                                 None, name, deleted=False, sql_ref=ref
                             )
-
-        elif (
-            isinstance(node.func, ast.Attribute)
-            and isinstance(node.func.value, ast.Name)
-            and len(node.args) == 1
-        ):
-            call_name = f"{node.func.value.id}.{node.func.attr}"
-            handler = CELL_DSL_REGISTRY.get(call_name)
-            if handler is not None:
-                self.language = handler.language
-                if handler.find_defs_and_refs is not None:
-                    source = _extract_literal_str_arg(node.args[0])
-                    if source:
-                        handler.find_defs_and_refs(self, node, source)
 
         # Visit arguments, keyword args, etc.
         self.generic_visit(node)

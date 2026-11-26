@@ -21,7 +21,7 @@ const moduleCache = new Map<string, Promise<string>>();
 
 /**
  * Dynamically import a DSL's input-widget ESM module (see
- * `CellDSL.input_widget_esm`), `customElements.define` its default export
+ * `register_dsl_widget`), `customElements.define` its default export
  * under its own named `tagName` export exactly once per content hash, and
  * resolve to that tag name. Caching by hash for the notebook's lifetime also
  * guarantees the `define` call only ever runs once per distinct module.
